@@ -1,15 +1,35 @@
 import { Button, FormControl, Input, InputLabel } from "@mui/material";
 import { useEffect, useState } from "react";
-import "./App.css";
 import Message from "./Components/Message";
+import db from "./firebase";
+import { doc, onSnapshot, collection, getDocs } from "firebase/firestore";
+
+import "./App.css";
 
 function App() {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([
-    { username: "Sonny", text: "hey guys" },
-    { username: "qazi", text: "whats up" },
-  ]);
+  const [messages, setMessages] = useState();
   const [username, setUsername] = useState("");
+
+  const getFirebaseData = async () => {
+    const querySnapshot = await getDocs(collection(db, "messages"));
+    querySnapshot.forEach((doc) => {
+      console.log(doc.data());
+    });
+  };
+
+  useEffect(() => {
+    // db.collection("messages").onSnapshot((snapshot) => {
+    //   setMessages(snapshot.docs.map((doc) => doc.data()));
+    // });
+    // const unsub = onSnapshot(
+    //   doc(db, "messages", "8F8qBTlysU6LDjsUOAMV"),
+    //   (doc) => {
+    //     console.log("Current data:", doc.data());
+    //   }
+    // );
+    getFirebaseData();
+  }, []);
 
   useEffect(() => {
     setUsername(prompt("Please enter your name"));
@@ -41,9 +61,9 @@ function App() {
       </form>
 
       {/* messages */}
-      {messages.map((message, index) => (
+      {/* {messages.map((message, index) => (
         <Message id={index} username={username} message={message} />
-      ))}
+      ))} */}
     </div>
   );
 }
