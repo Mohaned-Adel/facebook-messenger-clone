@@ -49,16 +49,21 @@ function App() {
       <h2>Welcome {username}</h2>
 
       <form className="app__form">
-        <FormControl>
-          <InputLabel>Enter a message...</InputLabel>
+        <FormControl className="app__formControl">
           <Input
+            className="app__input"
             value={input}
             onChange={(event) => setInput(event.target.value)}
+            placeholder="Enter a message..."
           />
-          <IconButton disabled={!input} type="submit" onClick={sendMessage}>
+          <IconButton
+            className="app__iconButton"
+            disabled={!input}
+            type="submit"
+            onClick={sendMessage}
+          >
             <SendIcon />
           </IconButton>
-          <Button>Send Message</Button>
         </FormControl>
       </form>
       <FlipMove>
