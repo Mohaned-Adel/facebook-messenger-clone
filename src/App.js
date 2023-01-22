@@ -2,7 +2,10 @@ import { Button, FormControl, Input, InputLabel } from "@mui/material";
 import { useEffect, useState } from "react";
 import Message from "./Components/Message";
 import db from "./firebase";
-import { doc, onSnapshot, collection, getDocs } from "firebase/firestore";
+import firebase from "firebase/compat/app";
+import FlipMove from "react-flip-move";
+import { IconButton } from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
 
 import "./App.css";
 
@@ -11,24 +14,14 @@ function App() {
   const [messages, setMessages] = useState();
   const [username, setUsername] = useState("");
 
-  const getFirebaseData = async () => {
-    const querySnapshot = await getDocs(collection(db, "messages"));
-    querySnapshot.forEach((doc) => {
-      console.log(doc.data());
-    });
-  };
-
   useEffect(() => {
-    // db.collection("messages").onSnapshot((snapshot) => {
-    //   setMessages(snapshot.docs.map((doc) => doc.data()));
-    // });
-    // const unsub = onSnapshot(
-    //   doc(db, "messages", "8F8qBTlysU6LDjsUOAMV"),
-    //   (doc) => {
-    //     console.log("Current data:", doc.data());
-    //   }
-    // );
-    getFirebaseData();
+    db.collection("messages")
+      .orderBy("timestamp", "desc")
+      .onSnapshot((snapshot) => {
+        setMessages(
+          snapshot.docs.map((doc) => ({ id: doc.id, message: doc.data() }))
+        );
+      });
   }, []);
 
   useEffect(() => {
@@ -37,33 +30,44 @@ function App() {
 
   const sendMessage = (event) => {
     event.preventDefault();
-    // all the logic to send a message
-    setMessages([...messages, { username: username, text: input }]);
+
+    db.collection("messages").add({
+      message: input,
+      username: username,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
     setInput("");
   };
 
   return (
     <div className="App">
+      <img
+        src="https://facebookbrand.com/wp-content/uploads/2018/09/Header-e1538151782912.png?w=100&h=100"
+        alt="Messanger logo"
+      />
       <h1>Hello from React 🚀!</h1>
       <h2>Welcome {username}</h2>
 
-      <form>
+      <form className="app__form">
         <FormControl>
           <InputLabel>Enter a message...</InputLabel>
           <Input
             value={input}
             onChange={(event) => setInput(event.target.value)}
           />
-          <Button disabled={!input} type="submit" onClick={sendMessage}>
-            Send Message
-          </Button>
+          <IconButton disabled={!input} type="submit" onClick={sendMessage}>
+            <SendIcon />
+          </IconButton>
+          <Button>Send Message</Button>
         </FormControl>
       </form>
-
-      {/* messages */}
-      {/* {messages.map((message, index) => (
-        <Message id={index} username={username} message={message} />
-      ))} */}
+      <FlipMove>
+        {/* messages */}
+        {messages &&
+          messages.map(({ message, id }) => (
+            <Message key={id} username={username} message={message} />
+          ))}
+      </FlipMove>
     </div>
   );
 }
